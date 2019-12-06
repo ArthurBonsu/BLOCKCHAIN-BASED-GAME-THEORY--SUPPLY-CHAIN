@@ -10,7 +10,7 @@ pragma solidity >=0.4.0 <0.6.0;
 
       // PEOPLES 
        struct Entities {
-       address participantaddress
+       address participantaddress;
        bytes32  participantnames;
         uint    participantrole;
         uint participantcount;
@@ -159,11 +159,13 @@ pragma solidity >=0.4.0 <0.6.0;
 
          //PARTIES CHOOSE THEIR BIDS,
      
-function addBid(bytes32 _bidname, bytes32 _biddername,  address payable _participant, bytes32 participantroles,uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment,uint orderpaidperunitcost) public payable
+function addBid(bytes32 _bidname, bytes32 _biddername,  address payable _participant, bytes32 participantroles,uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment,uint orderpaidperunitcost) public 
 
-return (uint yourchosenbid,   address leastexpectedbids) {
+returns (uint yourchosenbid,   address leastexpectedbids) {
  uint r=0; uint v = 0; uint ps=0; uint pr=0; uint SQ=0; uint sr=0; uint Q=0; uint sr=0; uint Q=0; uint ED=0; uint eTP =0; uint exRPT=0; uint w=0;
-           uint time=0; 
+           uint time=0; uint = leastretailquantity=0; uint retailquantity=0; uint supplyquantity=0; uint leastsupplyquantity =0; uint totalquantity=0; uint leasttotalquantity=0;
+           uint retailpayoff=0; uint leastretaiilpayoff=0; uint supplypayoff=0; uint leastsupplypayoff=0; uint totalpayoff=0; uint leasttotalpayoff=0; bytes32 _status;
+            
             uint counter =0;
             i=0;
             BidObject.bidcount =0;
@@ -206,55 +208,45 @@ return (uint yourchosenbid,   address leastexpectedbids) {
       bidname:  BidObject.bidstores[BidObject.bidname][counter].bidname,
       bidderaddress: BidObject.bidstores[BidObject.bidname][counter].bidderaddress,
       biddername:  BidObject.bidstores[BidObject.bidname][counter].biddername,
-      bidrole:  BidObject.bidstores[BidObject.bidname][counter].bidrole,
+      bidrole:  BidObject.bidstores[BidObject.bidname][counter].bidrole
         
     }));  
 
            //ADDING VARIABLE VALUES
                //CALCULATE EXPECTED RETAILOR'S PROFIT
-                require(BidObject.bidstores[BidObject.bidname][counter].bidrole == 'Supplier'){
+                require(BidObject.bidstores[BidObject.bidname][counter].bidrole == 'Supplier');
               
-           GameTheory.calculate_supplyOptimalOrderquantity(r, v, pr , ps, SQ, cr, sr,Q, ED, eTP);
-           function calculate_ExpectedSupplyProfit(ps, SQ, cs,Q, ED, eTP, w );
+         (supplyquantity,leastsupplyquantity)=   GameTheory.calculate_supplyOptimalOrderquantity(r, v, pr , ps, SQ, cr, sr,Q, ED, eTP);
+         (supplypayoff, leastsupplypayoff) =  GameTheory.calculate_ExpectedSupplyProfit (ps, SQ, cs,Q, ED, eTP, w );
                
-               }
+               
                //CALCULATE EXPECTED RETAILOR'S PROFIT
-                require(BidObject.bidstores[BidObject.bidname][counter].bidrole == 'Retailor'){
+                require(BidObject.bidstores[BidObject.bidname][counter].bidrole == 'Retailor');
              
-             GameTheory.calculate_retailOptimalOrderquantity(r, v, pr , ps, SQ, cr, cs,  Q, ED, eTP); 
+         (retailquantity,leastretailquantity)  =  GameTheory.calculate_retailOptimalOrderquantity(r, v, pr , ps, SQ, cr, cs,  Q, ED, eTP); 
            
-           GameTheory.calculate_ExpectedRetailorProfit(_bidname, r, v,ps,, cr, Q,ED, eTP, w);
-               }
+         (retailpayoff,leastretaiilpayoff) = GameTheory.calculate_ExpectedRetailorProfit(_bidname, r, v,ps, cr, Q,ED, eTP, w);
+               
 
                  //WE CALCULATE THE OPTIMAL ORDER QUANTITY
                
-              GameTheory.calculate_optimalOrderquantity(r, v, pr , ps, SQ, cr, cs, Q, ED, eTP);
-              GameTheory.
+          (totalquantity,leasttotalquantity)=    GameTheory.calculate_optimalOrderquantity(r, v, pr , ps, SQ, cr, cs, Q, ED, eTP);
+               require(supplyquantity=retailquantity= totalquantity );
+                      _status = 'Nash Equillibrium';
+       
+        (totalpayoff,leasttotalpayoff ) = GameTheory. calculateTotalExpectedProfit( _bidnames,  _status,  _participant,r ,  v,  pr,   ps,  SQ,  cr , retp,  sr , Q,  ED, exRPT);
 
+         
       
-
-
-
-
-         for(i=0, i< userdatabase[bididentity][i].length, i++){
-
-              
-         }
+         return (  yourchosenbid,   leastexpectedbids );
          
-        
-             
-         return (  consumeraddressretrieved, customerretrievedname,
-                 customerretrievedage
-     
-           );
-         
-         
+         time++;
      }
   
     
      // CALCULATE RETAILOR PROFIT
   
-   function calculate_ExpectedRetailorProfit(bytes32 _bidnames, address _retailoraddress, uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost,uint supplierquantity, uint retperunitcost, uint retordersize, uint expectedDemand, uint expectedTransferpayment, uint retpaidorderperunit) public returns (uint expectedRetailprofit, uint _leastexpectedprofit)   {
+   function calculate_ExpectedRetailorProfit(bytes32 _bidnames, address _retailoraddress, uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost,uint supplierquantity, uint retperunitcost, uint retordersize, uint expectedDemand, uint expectedTransferpayment, uint retpaidorderperunit)  public returns  (_expectedRetailorProfits, leastexpectedRetailorProfits) {
          uint time=0; uint counter=0; i=0; uint j=0; uint r=0;  uint v=0;  uint pr=0;  uint SQ=0;  uint cr=0;  uint Q=0;  uint ED=0; uint eTP=0;  uint _expectedRetailorProfit=0; 
              uint leastexpectedRetailorProfit = 0;
           r=_sellingprice;
@@ -266,11 +258,11 @@ return (uint yourchosenbid,   address leastexpectedbids) {
           Q= retordersize;
           ED=expectedDemand;
           eTP =expectedTransferpayment;
-          leastexpectedRetailorProfit = _leastexpectedprofit;
+          leastexpectedRetailorProfit =  leastexpectedRetailorProfits;
          
-          _expectedRetailorProfit = expectedRetailprofit; 
+          _expectedRetailorProfit = _expectedRetailprofits; 
           eTP = w * Q;
-        _expectedRetailorProfit= (r - v * pr)*SQ - (cr-v)Q - pr*ED - eTP;
+        _expectedRetailorProfit= (r - v * pr)*SQ - (cr-v)*Q - pr*ED - eTP;
 
              counter=i++;
         BidObject.bidname;
@@ -297,36 +289,37 @@ return (uint yourchosenbid,   address leastexpectedbids) {
       retailpayoffaddress:   payforretailObject.optimalretailpayoffcollection[ payforretailObject.retailpayoffaddress][counter].retailpayoffaddress,
       optimalretailpayoffvalue: payforretailObject.optimalretailpayoffcollection[payforretailObject.optimalretailpayoffvalue][counter].optimalretailpayoffvalue,
       optimalretailpayoffcount:  payforretailObject.optimalretailpayoffcollection[payforretailObject.optimalretailpayoffvalue][counter].optimalretailpayoffcount,
-      retpaybidnames:  payforretailObject.optimalretailpayoffcollection[payforretailObject.retpaybidnames][counter].retpaybidnames;
+      retpaybidnames:  payforretailObject.optimalretailpayoffcollection[payforretailObject.retpaybidnames][counter].retpaybidnames
                                
  }));  
              //FINDING THE LEAST RETAILOR PAYOFF
-       for(j=0, j <=retailpayoffaddress[bidname].length, j++)
+   
+       for(j=0; j <=retailpayoffaddress[bidname].length; j++)
        
-       {      
-                if (retailpayoffaddress[bidname][j] <retailpayoffaddress[bidname][j-1] ){
+            
+                if (retailpayoffaddress[bidname][j].optimalretailpayoffvalue <retailpayoffaddress[bidname][j-1].optimalretailpayoffvalue )
         
-        retailpayoffaddress[bidname][j] = retailpayoffaddress[bidname][j];
-                  else{
+        retailpayoffaddress[bidname][j].optimalretailpayoffvalue = retailpayoffaddress[bidname][j].optimalretailpayoffvalue;
+                  
+                  else
                  
-                   retailpayoffaddress[bidname][j] = retailpayoffaddress[bidname][j-1];
-                  } 
-        }
+                   retailpayoffaddress[bidname][j].optimalretailpayoffvalue = retailpayoffaddress[bidname][j-1].optimalretailpayoffvalue;
+                  
+        
        
 
-       leastexpectedRetailorProfit =  retailpayoffaddress[bidname][j];
-       }
+       leastexpectedRetailorProfit =  retailpayoffaddress[bidname][j].optimalretailpayoffvalue;
+       
          
    // PULL INTO THE DATABASE
                  
          
         //LEAST EXPECTED PROFIT
+ 
+ return ( _expectedRetailorProfit,  leastexpectedRetailorProfit);
+ }
+ 
          
-             
-         return (_expectedRetailorProfit);
-         }
-
-
 
 
               // CALCULATE EXPECTED SUPPLY PROFIT
@@ -488,7 +481,7 @@ payfortotalsupplyObject.optimaltotalsupplypayoffcollection[  payfortotalsupplyOb
  }));  
 
      //FINDING THE LEAST RETAILOR PAYOFF
-       for(j=0, j <=payfortotalsupplycollection[bidname].length, j++)
+       for (j=0, j <=payfortotalsupplycollection[bidname].length, j++)
        
        {      
                 if (payfortotalsupplycollection[bidname][j] <payfortotalsupplycollection[bidname][j-1] ){
@@ -592,7 +585,7 @@ forsupplyorderObject.optimalsupplyordercollection[  forsupplyorderObject.supoptp
        leastexpectedSupplyerQuantity =  forsupplyordercollection[bidname][j];
        }
              
-         return ( s_orderquantity);
+         return ( s_orderquantity, leastexpectedSupplyerQuantity);
          
    // 
      }
