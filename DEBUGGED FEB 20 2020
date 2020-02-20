@@ -1,0 +1,750 @@
+pragma solidity >=0.4.0 <0.6.0;
+ 
+
+
+ import "./EscrowComplianceCecker.sol";
+ import  "./Industry.sol";
+ contract   GameTheory  {
+          uint  i=0; 
+      
+
+       
+        
+           //BIDS
+        struct Bids {
+       bytes32  bidname;
+       address bidderaddress;
+       bytes32 biddername;
+        bytes32 bidrole;
+        bytes32 bidcount;
+        
+    
+      mapping (address => Bids[1000]) bidstores;
+      mapping (bytes32 => Bids[1000]) thebidclaims;
+
+       }
+       
+        Bids[] public bidscollection; 
+        Bids BidObject;
+
+         //OPTIMAL RETAILER  ORDER QUANTITY
+ struct OptimalRetailOrder {
+        address  retailorordereraddress;
+        bytes32 retpaybidnames;
+       bytes32  retailerordername;
+        bytes32   retailerorderrole;
+       uint      optimalretailordervalue;
+       uint          optimalretailorordercount;
+       
+      mapping (address => OptimalRetailOrder[1000]) optimalretailordercollection;
+      mapping (bytes32 => OptimalRetailOrder[1000]) optimalretailorderstorage;
+
+       }
+ 
+        OptimalRetailOrder[] public orderretailcollection; 
+        OptimalRetailOrder orderretailorObject;
+
+           // OPTIMAL SUPPLIER ORDER QUANTITY
+ struct OptimalSupplyOrder {
+  address  supplyerordereraddress;
+            bytes32 supoptpaybidnames;
+       bytes32  supplyordername;
+        bytes32   supplyerorderrole;
+       uint      optimalsupplyordervalue;
+       uint          optimalsupplyordercount;
+       
+      mapping (address => OptimalSupplyOrder[1000]) optimalsupplyordercollection;
+      mapping (bytes32 => OptimalSupplyOrder[1000]) optimalsupplyorderstorage;
+
+       }
+       
+ 
+
+         OptimalSupplyOrder[] public forsupplyordercollection; 
+        OptimalSupplyOrder forsupplyorderObject;
+
+            // OPTIMAL TOTAL SUPPLY CHAIN ORDER QUANTITY
+
+        struct OptimalTotalSupplyChainOrder {
+       address  totalsupplyeraddress;
+       bytes32  totalsupplyname;
+       bytes32 suporderbidnames;
+        
+       uint      optimaltotalsupplyvalue;
+       uint          optimaltotalsupplycount;
+       
+      mapping (address => OptimalTotalSupplyChainOrder[1000]) optimaltotalsupplyordercollection;
+      mapping (bytes32 => OptimalTotalSupplyChainOrder[1000]) optimaltotalsupplyorderstorage;
+
+       }
+       
+ 
+  OptimalTotalSupplyChainOrder[] public ourtotalsupplyordercollection; 
+        OptimalTotalSupplyChainOrder fortotalordersupplyObject;
+
+          //OPTIMAL RETAILER PAYOFF
+         struct OptimalRetailPayoffs {
+       address  retailpayoffaddress;
+        bytes32 retpaybidnames;
+       bytes32  retailpayoffname;
+        bytes32   retailpayoffrole;
+       uint      optimalretailpayoffvalue;
+       uint          optimalretailpayoffcount;
+       
+      mapping (address => OptimalRetailPayoffs[1000]) optimalretailpayoffcollection;
+      mapping (bytes32 => OptimalRetailPayoffs[1000]) optimalretailpayoffstorage;
+
+       }
+       
+ 
+  OptimalRetailPayoffs[] public payforretailcollection; 
+        OptimalRetailPayoffs payforretailObject;
+
+        // SUPPLIER OPTIMAL PAYOFF
+
+ struct OptimalSupplyPayoffs {
+       address  supplyerpayoffaddress;
+       bytes32 suppaybidnames;
+       bytes32  supplypayoffname;
+        bytes32   supplyerpayoffrole;
+       uint      optimalsupplypayoffvalue;
+       uint          optimalsupplypayoffcount;
+       
+      mapping (address => OptimalSupplyPayoffs[1000]) optimalsupplypayoffcollection;
+      mapping (bytes32 => OptimalSupplyPayoffs[1000]) optimalsupplypayoffstorage;
+
+       }
+       
+ 
+        OptimalSupplyPayoffs[] public payforsupplycollection; 
+        OptimalSupplyPayoffs payforsupplyObject;
+
+
+               //OPTIMAL TOTAL SUPPLIER AND RETAILER PAYOFF FOR 
+
+  struct OptimalTotalSupplyPayoffs {
+       address  totalsupplypayoffaddress;
+       bytes32 totpaybidnames;
+       bytes32  totalsupplypayoffname;
+        bytes32   totalsupplypayoffstatus;
+       uint      optimaltotalpayoffvalue;
+       uint          optimaltotalpayoffcount;
+       
+      mapping (address => OptimalTotalSupplyPayoffs[1000]) optimaltotalsupplypayoffcollection;
+      mapping (bytes32 => OptimalTotalSupplyPayoffs[1000]) optimaltotalsupplypayoffstorage;
+
+       }
+       
+ 
+  OptimalTotalSupplyPayoffs[] public payfortotalsupplycollection; 
+        OptimalTotalSupplyPayoffs payfortotalsupplyObject;
+
+
+         //PARTIES CHOOSE THEIR BIDS,
+     
+function addBid(bytes32 _bidname, bytes32 _biddername,  address payable _participant, bytes32 participantroles,uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment,uint orderpaidperunitcost) public 
+
+returns (uint yourchosenbid,   address leastexpectedbids) {
+
+
+ uint r=0; uint v = 0; uint ps=0; uint pr=0; uint SQ=0; uint sr=0; uint Q=0;   uint ED=0; uint eTP =0; uint exRPT=0; uint w=0;
+           uint time=0; uint = leastretailquantity=0; uint retailquantity=0; uint supplyquantity=0; uint leastsupplyquantity =0; uint totalquantity=0; uint leasttotalquantity=0;
+           uint retailpayoff=0; uint leastretaiilpayoff=0; uint supplypayoff=0; uint leastsupplypayoff=0; uint totalpayoff=0; uint leasttotalpayoff=0; bytes32 _status;
+            
+            uint counter =0;
+            i=0;
+            BidObject.bidcount =0;
+           BidObject.bidname = _bidname;
+           BidObject.bidderaddress = _participant;
+           BidObject.biddername = _biddername;
+           BidObject.bidrole = participantroles;
+           i =  BidObject.bidcount;
+
+          counter = i++;
+            r = _sellingprice;
+           v= _salvagevalue;
+
+          
+          ps= _supplylossofgoodwillcost;
+          pr = _retlossofgoodwillcost;
+           cr = retperunitcost;
+
+         SQ =supplierquantity;
+          sr = suppliersperunitcost;
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+          exRPT= expectedRetailprofit;
+
+           w = orderpaidperunitcost;
+
+                        
+       
+                      // GET BID DETAILS
+                   BidObject.bidstores[BidObject.bidname][counter].bidname = _bidname;
+                   BidObject.bidstores[BidObject.bidname][counter].bidderaddress = _participant;
+                   BidObject.bidstores[BidObject.bidname][counter].biddername = _biddername;
+                   BidObject.bidstores[BidObject.bidname][counter].bidrole =  participantroles;
+
+                        //PUSH  THE DETAILS OF THE OTHER BIDDING VALUES
+          
+              bidscollection.push(GameTheory(
+     {
+      bidname:  BidObject.bidstores[BidObject.bidname][counter].bidname,
+      bidderaddress: BidObject.bidstores[BidObject.bidname][counter].bidderaddress,
+      biddername:  BidObject.bidstores[BidObject.bidname][counter].biddername,
+      bidrole:  BidObject.bidstores[BidObject.bidname][counter].bidrole
+        
+    }));  
+
+           //ADDING VARIABLE VALUES
+               //CALCULATE EXPECTED RETAILOR'S PROFIT
+                require(BidObject.bidstores[BidObject.bidname][counter].bidrole == 'Supplier');
+              
+         (supplyquantity,leastsupplyquantity)=   GameTheory.calculate_supplyOptimalOrderquantity(r, v, pr , ps, SQ, cr, sr,Q, ED, eTP);
+         (supplypayoff, leastsupplypayoff) =  GameTheory.calculate_ExpectedSupplyProfit (ps, SQ, cs,Q, ED, eTP, w );
+               
+               
+               //CALCULATE EXPECTED RETAILOR'S PROFIT
+                require(BidObject.bidstores[BidObject.bidname][counter].bidrole == 'Retailor');
+             
+         (retailquantity,leastretailquantity)  =  GameTheory.calculate_retailOptimalOrderquantity(r, v, pr , ps, SQ, cr, cs,  Q, ED, eTP); 
+           
+         (retailpayoff,leastretaiilpayoff) = GameTheory.calculate_ExpectedRetailorProfit(_bidname, r, v,ps, cr, Q,ED, eTP, w);
+               
+
+                 //WE CALCULATE THE OPTIMAL ORDER QUANTITY
+               
+          (totalquantity,leasttotalquantity)=    GameTheory.calculate_optimalOrderquantity(r, v, pr , ps, SQ, cr, cs, Q, ED, eTP);
+               require(supplyquantity=retailquantity= totalquantity );
+                      _status = 'Nash Equillibrium';
+       
+        (totalpayoff,leasttotalpayoff ) = GameTheory. calculateTotalExpectedProfit( _bidnames,  _status,  _participant,r ,  v,  pr,   ps,  SQ,  cr , retp,  sr , Q,  ED, exRPT);
+
+         
+      
+         return (  yourchosenbid,   leastexpectedbids );
+         
+         time++;
+     }
+  
+    
+     // CALCULATE RETAILOR PROFIT
+  
+   function calculate_ExpectedRetailorProfit(bytes32 _bidnames, address _retailoraddress, uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost,uint supplierquantity, uint retperunitcost, uint retordersize, uint expectedDemand, uint expectedTransferpayment, uint retpaidorderperunit)  public returns  (uint _expectedRetailorProfitsgained, uint  _leastexpectedRetailorProfitsgained) {
+         uint time=0; uint counter=0; i=0; uint j=0; uint r=0;  uint v=0;  uint pr=0;  uint SQ=0;  uint cr=0;  uint Q=0;  uint ED=0; uint eTP=0; uint w = 0; uint eTP=0; 
+         
+            uint _expectedRetailorProfithad=0; 
+             uint leastexpectedRetailorProfithad = 0;
+          r=_sellingprice;
+          v =_salvagevalue;
+          w = retpaidorderperunit;
+          pr= _retlossofgoodwillcost;
+         SQ =supplierquantity;
+          cr = retperunitcost;
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+          leastexpectedRetailorProfit =  leastexpectedRetailorProfits;
+         
+          _expectedRetailorProfit = _expectedRetailprofits; 
+          eTP = w * Q;
+        _expectedRetailorProfit= (r - v * pr)*SQ - (cr-v)*Q - pr*ED - eTP;
+
+             counter=i++;
+        BidObject.bidname;
+        payforretailObject.retailpayoffaddress;
+        payforretailObject.retailpayoffname;
+        payforretailObject.retpaybidnames=_bidnames;        
+        payforretailObject.retailpayoffrole;
+        payforretailObject.optimalretailpayoffvalue;
+        payforretailObject.optimalretailpayoffcount=0;
+
+          
+
+
+                    payforretailObject.optimalretailpayoffcollection[ payforretailObject.retpaybidnames][counter].retailpayoffaddress = _retailoraddress;
+                   payforretailObject.optimalretailpayoffcollection[payforretailObject.retpaybidnames][counter].optimalretailpayoffvalue =  _expectedRetailorProfit;
+                    payforretailObject.optimalretailpayoffcollection[payforretailObject.retpaybidnames][counter].optimalretailpayoffcount =  counter;
+                     payforretailObject.optimalretailpayoffcollection[payforretailObject.retpaybidnames][counter].retpaybidnames =  _bidnames;
+                  
+                   
+
+                 
+                  payforretailcollection.push(GameTheory(
+     {
+      retailpayoffaddress:   payforretailObject.optimalretailpayoffcollection[ payforretailObject.retailpayoffaddress][counter].retailpayoffaddress,
+      optimalretailpayoffvalue: payforretailObject.optimalretailpayoffcollection[payforretailObject.optimalretailpayoffvalue][counter].optimalretailpayoffvalue,
+      optimalretailpayoffcount:  payforretailObject.optimalretailpayoffcollection[payforretailObject.optimalretailpayoffvalue][counter].optimalretailpayoffcount,
+      retpaybidnames:  payforretailObject.optimalretailpayoffcollection[payforretailObject.retpaybidnames][counter].retpaybidnames
+                               
+ }));  
+             //FINDING THE LEAST RETAILOR PAYOFF
+   
+       for(j=0; j <=retailpayoffaddress[bidname].length; j++)
+       
+            
+                if (retailpayoffaddress[bidname][j].optimalretailpayoffvalue <retailpayoffaddress[bidname][j-1].optimalretailpayoffvalue )
+        
+        retailpayoffaddress[bidname][j].optimalretailpayoffvalue = retailpayoffaddress[bidname][j].optimalretailpayoffvalue;
+                  
+                  else
+                 
+                   retailpayoffaddress[bidname][j].optimalretailpayoffvalue = retailpayoffaddress[bidname][j-1].optimalretailpayoffvalue;
+                  
+        
+       
+
+       leastexpectedRetailorProfit =  retailpayoffaddress[bidname][j].optimalretailpayoffvalue;
+       
+         
+   // PULL INTO THE DATABASE
+                 
+         
+        //LEAST EXPECTED PROFIT
+ 
+ return ( _expectedRetailorProfit,  leastexpectedRetailorProfit);
+ }
+ 
+        
+
+
+              // CALCULATE EXPECTED SUPPLY PROFIT
+  
+   function calculate_ExpectedSupplyProfit(bytes32 _bidnames, address _supplyeraddress, uint _supplylossofgoodwillcost, uint supplierquantity, uint suppliersperunitcost,uint retordersize,  uint expectedDemand, uint expectedTransferpayment,  uint retpaidorderperunit ) public returns(uint _expectedSupplyprofit, uint _leastexpectedSupplyprofit)   {
+          uint time=0;  uint ps=0;  uint SQ=0; uint counter=0; i=0; uint j=0;  uint sr=0;  uint Q=0;  uint ED=0; uint eTP=0; 
+         
+          uint leastexpectedSupplyProfit = 0;
+             uint expectedsupplyprofit= 0;
+             
+            
+          ps= _supplylossofgoodwillcost;
+         SQ =supplierquantity;
+          sr = suppliersperunitcost;
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+            
+
+            leastexpectedSupplyProfit = _leastexpectedSupplyprofit;
+         
+          expectedsupplyprofit = _expectedSupplyprofit; 
+             
+             eTP = w * Q; 
+        
+           expectedsupplyprofit = ps* SQ -sr* Q - ps* ED + eTP;           
+             counter++;
+             BidObject.bidname;
+        payforsupplyObject.supplyerpayoffaddress;
+        payforsupplyObject.suppaybidnames =_bidnames;
+        payforsupplyObject.supplypayoffname;
+        payforsupplyObject.supplyerpayoffrole;
+        payforsupplyObject.optimalsupplypayoffvalue;
+        payforsupplyObject.optimalsupplypayoffcount=0;
+
+
+
+
+
+     payforsupplyObject.optimalsupplypayoffcollection[ payforsupplyObject.suppaybidnames][counter].supplyerpayoffaddress = _supplyeraddress;
+                    payforsupplyObject.optimalsupplypayoffcollection[payforsupplyObject.suppaybidnames][counter].optimalsupplypayoffvalue =  _expectedSupplyprofit;
+                     payforsupplyObject.optimalsupplypayoffcollection[payforsupplyObject.suppaybidnames][counter].optimalsupplypayoffcount =  counter;
+                  
+                 payforsupplyObject.optimalsupplypayoffcollection[payforsupplyObject.suppaybidnames][counter].suppaybidnames =  _bidnames;
+
+                 
+                  payforsupplycollection.push(GameTheory(
+     {
+      supplyerpayoffaddress:     payforsupplyObject.optimalsupplypayoffcollection[ payforsupplyObject.suppaybidnames][counter].supplyerpayoffaddress,
+      optimalsupplypayoffvalue:  payforsupplyObject.optimalsupplypayoffcollection[payforsupplyObject.suppaybidnames][counter].optimalsupplypayoffvalue,
+      optimalsupplypayoffcount:   payforsupplyObject.optimalsupplypayoffcollection[payforsupplyObject.suppaybidnames][counter].optimalsupplypayoffcount,
+      suppaybidnames: payforsupplyObject.optimalsupplypayoffcollection[payforsupplyObject.suppaybidnames][counter].suppaybidnames
+       
+                               
+ }));  
+              //FINDING THE LEAST SUPPLYER PAYOFF
+       for(j=0; j <=payforsupplycollection[bidname].length; j++)
+       
+       {      
+                if (payforsupplycollection[bidname][j] <payforsupplycollection[bidname][j-1] ){
+        
+        payforsupplycollection[bidname][j] = payforsupplycollection[bidname][j];
+                }
+                  else{
+                 
+                   payforsupplycollection[bidname][j] = payforsupplycollection[bidname][j-1];
+                  } 
+        }
+       
+
+     
+          leastexpectedSupplyProfit =  payforsupplycollection[bidname][j];
+         
+     return (expectedsupplyprofit, leastexpectedSupplyProfit);
+         
+     }
+
+          
+            
+
+              // CALCULATE EXPECTED TOTAL EXPECTED PROFIT
+     function calculateTotalExpectedProfit(bytes32 _bidnames, bytes32 _status,  address _totalsupplyeraddress, uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment  ) public returns(uint _calculateTotalExpectedProfit, uint _leastexpectedTotalprofit )
+              
+     { 
+           uint time=0; uint r=0;  uint counter=0; i=0; uint j=0; uint totalgoodwillcost=0; uint totalcostperunitcost=0;  uint v=0;  uint pr=0;  uint SQ=0;  uint cr=0;  uint Q=0;  uint ED=0; uint eTP=0; uint p=0; uint c=0; uint thecalculateTotalExpectedProfit=0; 
+           
+             uint leastexpectedTotalProfit = 0;
+           r = _sellingprice;
+           v= _salvagevalue;
+
+          
+          ps= _supplylossofgoodwillcost;
+          pr = _retlossofgoodwillcost;
+          
+
+         SQ =supplierquantity;
+          sr = suppliersperunitcost;
+
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+          thecalculateTotalExpectedProfit =  _calculateTotalExpectedProfit; 
+          
+            totalgoodwillcost = _retlossofgoodwillcost + _supplylossofgoodwillcost;
+          totalcostperunitcost =  retperunitcost + suppliersperunitcost;
+           p = totalgoodwillcost;
+           c = totalcostperunitcost;
+            leastexpectedTotalProfit = _leastexpectedTotalprofit;
+         
+           thecalculateTotalExpectedProfit =  ( r - v + p) * SQ - (c-v) * Q  - p * ED;          
+             counter++;
+
+                   BidObject.bidname;
+        payfortotalsupplyObject.totalsupplypayoffaddress;
+        payfortotalsupplyObject.totpaybidnames = _bidnames;
+         payfortotalsupplyObject. totalsupplypayoffname;
+        payfortotalsupplyObject. totalsupplypayoffstatus;
+        payfortotalsupplyObject.optimaltotalpayoffvalue;
+        payfortotalsupplyObject.optimaltotalpayoffcount=0;
+
+
+
+
+payfortotalsupplyObject.optimaltotalsupplypayoffcollection[  payfortotalsupplyObject.totpaybidnames][counter].totalsupplypayoffaddress = _totalsupplyeraddress;
+                 
+                   payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].optimaltotalpayoffvalue =  thecalculateTotalExpectedProfit;
+                 
+                   payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].totalsupplypayoffstatus =  _status;
+                   
+                    payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].optimaltotalpayoffcount =  counter;
+                  
+                  payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].totpaybidnames =_bidnames;
+                  
+
+                 
+                  payfortotalsupplycollection.push(GameTheory(
+     {
+      totalsupplypayoffaddress:  payfortotalsupplyObject.optimaltotalsupplypayoffcollection[  payfortotalsupplyObject.totpaybidnames][counter].totalsupplypayoffaddress,
+
+      optimaltotalpayoffvalue: payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].optimaltotalpayoffvalue,
+
+      totalsupplypayoffstatus: payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].totalsupplypayoffstatus,
+         
+      optimaltotalpayoffcount:   payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].optimaltotalpayoffcount,
+      totpaybidnames: payfortotalsupplyObject.optimaltotalsupplypayoffcollection[ payfortotalsupplyObject.totpaybidnames][counter].totpaybidnames 
+                               
+ }));  
+
+     //FINDING THE LEAST RETAILOR PAYOFF
+       for (j=0; j <=payfortotalsupplycollection[bidname].length; j++)
+       
+       {      
+                if (payfortotalsupplycollection[bidname][j] <payfortotalsupplycollection[bidname][j-1] ){
+        
+        payfortotalsupplycollection[bidname][j] = payfortotalsupplycollection[bidname][j];
+                }
+                  else{
+                 
+                   payfortotalsupplycollection[bidname][j] = payfortotalsupplycollection[bidname][j-1];
+                  } 
+        }
+       
+
+       leastexpectedTotalProfit =  payfortotalsupplycollection[bidname][j];
+      
+             
+         return (thecalculateTotalExpectedProfit, leastexpectedTotalProfit);
+
+ }
+
+     
+
+
+
+                   // CALCULATE SUPPLY OPTIMAL OREDERED QUANTITY
+function calculate_supplyOptimalOrderquantity(bytes32 _bidnames, address supplyer, uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment) public returns(uint supplyoptimalorderquantity, uint _leastexpectedprofit) {
+        
+                   uint time=0; uint r=0;  uint counter=0; i=0; uint j=0; uint totalgoodwillcost=0; uint totalcostperunitcost=0;  uint v=0;  uint pr=0;  uint SQ=0;  uint cr=0;  uint Q=0;  uint ED=0; uint eTP=0; uint p=0; uint c=0; 
+                   
+                   uint s_orderquantity=0;
+    
+              
+             uint leastexpectedSupplyerQuantity= 0;
+    
+           r = _sellingprice;
+           v= _salvagevalue;
+
+          
+          ps= _supplylossofgoodwillcost;
+          pr = _retlossofgoodwillcost;
+          
+
+
+         SQ =supplierquantity;
+          sr = suppliersperunitcost;
+           cr = retperunitcost;
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+          exRPT= expectedRetailprofit;
+
+            totalgoodwillcost = _retlossofgoodwillcost + _supplylossofgoodwillcost;
+          totalcostperunitcost =  retperunitcost + suppliersperunitcost;
+           p = totalgoodwillcost;
+           c = totalcostperunitcost;
+s_orderquantity = supplyoptimalorderquantity; 
+ leastexpectedSupplyerQuantity = _leastexpectedprofit;
+         
+          
+           s_orderquantity =  (w - sr)/ ps;
+  counter++;
+
+               BidObject.bidname;
+        forsupplyorderObject.supplyerordereraddress;
+        forsupplyorderObject.supoptpaybidnames;
+        forsupplyorderObject.supplyordername;
+        forsupplyorderObject.supplyerorderrole;
+        forsupplyorderObject.optimalsupplyordervalue;
+        forsupplyorderObject.optimalsupplyordercount=0;
+
+
+
+forsupplyorderObject.optimalsupplyordercollection[  forsupplyorderObject.supoptpaybidnames][counter].supplyerordereraddress = supplyer;
+                   forsupplyorderObject.optimalsupplyordercollection[ forsupplyorderObject.supoptpaybidnames][counter].optimalsupplyordervalue =  s_orderquantity;
+                    forsupplyorderObject.optimalsupplyordercollection[ forsupplyorderObject.supoptpaybidnames][counter].optimalsupplyordercount =  counter;
+                  
+                  payfortotalsupplyObject.optimalsupplyordercollection[ forsupplyorderObject.supoptpaybidnames][counter].supoptpaybidnames  =_bidnames;
+
+                 
+                  forsupplyordercollection.push(GameTheory(
+     {
+      supplyerordereraddress:  forsupplyorderObject.optimalsupplyordercollection[  forsupplyorderObject.supoptpaybidnames][counter].supplyerordereraddress,
+      optimalsupplyordervalue:forsupplyorderObject.optimalsupplyordercollection[ forsupplyorderObject.supoptpaybidnames][counter].optimalsupplyordervalue,
+      optimalsupplyordercount:   forsupplyorderObject.optimalsupplyordercollection[ forsupplyorderObject.supoptpaybidnames][counter].optimalsupplyordercount,
+      supoptpaybidnames: payfortotalsupplyObject.optimalsupplyordercollection[ forsupplyorderObject.supoptpaybidnames][counter].supoptpaybidnames 
+       
+                               
+ }));  
+
+     //FINDING THE LEAST RETAILOR PAYOFF
+       for(j=0; j <=forsupplyordercollection[bidname].length; j++)
+       
+       {      
+                if (forsupplyordercollection[bidname][j] <forsupplyordercollection[bidname][j-1] ){
+        
+        forsupplyordercollection[bidname][j] = forsupplyordercollection[bidname][j];
+                  }else{
+                 
+                   forsupplyordercollection[bidname][j] = forsupplyordercollection[bidname][j-1];
+                  } 
+        }
+       
+
+       leastexpectedSupplyerQuantity =  forsupplyordercollection[bidname][j];
+       
+             
+         return ( s_orderquantity, leastexpectedSupplyerQuantity);
+         
+   // 
+     }
+          
+              
+              // CALCULATE RETAIL OPTIMAL ORDER QUANTITY
+function calculate_retailOptimalOrderquantity(bytes32 _bidnames, address retailer,uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment) public returns(uint retailoptimalorderquantity, uint _leastexpectedquantity)   {
+        
+                   uint time=0; uint r=0; uint counter=0; i=0; uint j=0;  uint totalgoodwillcost=0; uint totalcostperunitcost=0;  uint v=0;  uint pr=0;  uint SQ=0;  uint cr=0;  uint Q=0;  uint ED=0; uint eTP=0; uint p=0; uint c=0; uint w=0; uint retailoptorderquant=0;
+
+                  
+             uint leastexpectedRetailorQuantity = 0;
+            
+           r = _sellingprice;
+           v= _salvagevalue;
+
+          
+          ps= _supplylossofgoodwillcost;
+          pr = _retlossofgoodwillcost;
+          
+
+         SQ =supplierquantity;
+          sr = suppliersperunitcost;
+           cr = retperunitcost;
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+          exRPT= expectedRetailprofit;
+
+            totalgoodwillcost = _retlossofgoodwillcost + _supplylossofgoodwillcost;
+          totalcostperunitcost =  retperunitcost + suppliersperunitcost;
+           p = totalgoodwillcost;
+           c = totalcostperunitcost;
+           w = orderpaidperunitcost;
+         retailoptorderquant =  retailoptimalorderquantity;
+          leastexpectedRetailorQuantity = _leastexpectedquantity;
+         
+          _expectedRetailorProfit = expectedRetailprofit;
+           retailoptorderquant =   (w + cr - v) / r - v + pr;
+
+               counter++;
+
+               BidObject.bidname;
+        orderretailorObject.retailorordereraddress;
+        orderretailorObject.retpaybidnames;
+        orderretailorObject.retailerordername;
+        orderretailorObject.retailerorderrole;
+        orderretailorObject.optimalretailordervalue;
+        orderretailorObject.optimalretailorordercount=0;
+
+
+        
+
+orderretailorObject.optimalretailordercollection[ orderretailorObject.retpaybidnames][counter].retailorordereraddress = retailer;
+                   orderretailorObject.optimalretailordercollection[orderretailorObject.retpaybidnames][counter].optimalretailordervalue =  _expectedRetailorProfit;
+                    orderretailorObject.optimalretailordercollection[orderretailorObject.retpaybidnames][counter].optimalretailorordercount =  counter;
+                  
+                    orderretailorObject.optimalretailordercollection[ orderretailorObject.retpaybidnames][counter].retpaybidnames  =_bidnames;
+
+                 
+                  orderretailcollection.push(GameTheory(
+     {
+      retailpayoffaddress:   orderretailorObject.optimalretailpayoffcollection[ orderretailorObject.retailpayoffaddress][counter].retailpayoffaddress,
+      optimalretailpayoffvalue: orderretailorObject.optimalretailpayoffcollection[orderretailorObject.optimalretailpayoffvalue][counter].optimalretailpayoffvalue,
+      optimalretailpayoffcount:  orderretailorObject.optimalretailpayoffcollection[orderretailorObject.optimalretailpayoffvalue][counter].optimalretailpayoffcount,
+      retpaybidnames:  orderretailorObject.optimalretailordercollection[ orderretailorObject.retpaybidnames][counter].retpaybidnames
+
+       
+                               
+ }));  
+
+     //FINDING THE LEAST RETAILOR PAYOFF
+       for(j=0; j <=orderretailcollection[bidname].length; j++)
+       
+       {      
+                if (orderretailcollection[bidname][j] <orderretailcollection[bidname][j-1] ){
+        
+        orderretailcollection[bidname][j] = orderretailcollection[bidname][j];
+                  }else{
+                 
+                   orderretailcollection[bidname][j] = orderretailcollection[bidname][j-1];
+                  } 
+        }
+       
+
+       leastexpectedRetailorQuantity =  orderretailcollection[bidname][j];
+       
+             
+         return ( retailoptorderquant, leastexpectedRetailorQuantity);
+         
+         
+     }
+
+
+                      // CALCULATE OPTIMAL ORDER QUANTITY FOR WHOLE SUPPLY CHAIN
+
+     function calculate_optimalOrderquantity(bytes32 _bidnames, address optimaladdress, uint _sellingprice, uint _salvagevalue, uint _retlossofgoodwillcost , uint _supplylossofgoodwillcost, uint supplierquantity, uint retperunitcost, uint suppliersperunitcost,  uint retordersize, uint expectedDemand, uint expectedTransferpayment) public returns(uint optimalorderquantity,  uint _leastexpectedoptimalorderquantity)   {
+        
+                   uint time=0; uint r=0; uint counter=0; i=0; uint j=0;   uint totalgoodwillcost=0; uint totalcostperunitcost=0;  uint v=0;  uint pr=0;  uint SQ=0;  uint cr=0;  uint Q=0;  uint ED=0; uint eTP=0; uint p=0; uint c=0; uint _ooptimalOrderquantity = 0;
+            uint _expectedRetailorProfit=0; 
+             uint leastexpectedoptimalorderquantity = 0;
+           r = _sellingprice;
+           v= _salvagevalue;
+
+          
+          ps= _supplylossofgoodwillcost;
+          pr = _retlossofgoodwillcost;
+          
+
+         SQ =supplierquantity;
+          sr = suppliersperunitcost;
+          Q= retordersize;
+          ED=expectedDemand;
+          eTP =expectedTransferpayment;
+          exRPT= expectedRetailprofit;
+
+            totalgoodwillcost = _retlossofgoodwillcost + _supplylossofgoodwillcost;
+          totalcostperunitcost =  retperunitcost + suppliersperunitcost;
+           p = totalgoodwillcost;
+           c = totalcostperunitcost;
+             _ooptimalOrderquantity =  optimalorderquantity;
+             leastexpectedoptimalorderquantity = _leastexpectedoptimalorderquantity;
+         
+          
+          _ooptimalOrderquantity =  ( c - v ) / r - v + p;
+             
+              //I HAVE TO PUT IT INTO THE DATABASE
+              counter++;
+
+               BidObject.bidname;
+        fortotalordersupplyObject.totalsupplyeraddress;
+        fortotalordersupplyObject.totalsupplyname;
+        fortotalordersupplyObject.suporderbidnames;
+        fortotalordersupplyObject.optimaltotalsupplyvalue;
+      
+        fortotalordersupplyObject.optimaltotalsupplycount=0;
+
+
+
+            
+
+
+fortotalordersupplyObject.optimalretailpayoffcollection[ fortotalordersupplyObject.suporderbidnames][counter].totalsupplyeraddress = optimaladdress;
+                   fortotalordersupplyObject.optimalretailpayoffcollection[fortotalordersupplyObject.suporderbidnames][counter].optimaltotalsupplyvalue =  _ooptimalOrderquantity;
+                    fortotalordersupplyObject.optimalretailpayoffcollection[ fortotalordersupplyObject.suporderbidnames][counter].optimaltotalsupplycount =  counter;
+                  
+                   fortotalordersupplyObject.optimalretailordercollection[  fortotalordersupplyObject.suporderbidnames][counter].suporderbidnames= _bidnames;
+                 
+                  ourtotalsupplyordercollection.push(GameTheory(
+     {
+      totalsupplyeraddress:   fortotalordersupplyObject.optimalretailpayoffcollection[ fortotalordersupplyObject.suporderbidnames][counter].totalsupplyeraddress,
+      optimalretailpayoffvalue: fortotalordersupplyObject.optimalretailpayoffcollection[fortotalordersupplyObject.suporderbidnames][counter].optimalretailpayoffvalue,
+      optimalretailpayoffcount:  fortotalordersupplyObject.optimalretailpayoffcollection[fortotalordersupplyObject.suporderbidnames][counter].optimalretailpayoffcount,
+        suporderbidnames:    fortotalordersupplyObject.optimalretailordercollection[  fortotalordersupplyObject.suporderbidnames][counter].suporderbidnames
+       
+                               
+ }));  
+
+     //FINDING THE LEAST RETAILOR PAYOFF
+       for(j=0; j <=ourtotalsupplyordercollection[bidname].length; j++)
+       
+       {      
+                if (ourtotalsupplyordercollection[bidname][j] <ourtotalsupplyordercollection[bidname][j-1] ){
+        
+        ourtotalsupplyordercollection[bidname][j] = ourtotalsupplyordercollection[bidname][j];
+              }    else{
+                 
+                   ourtotalsupplyordercollection[bidname][j] = ourtotalsupplyordercollection[bidname][j-1];
+                  } 
+        }
+       
+
+       leastexpectedoptimalorderquantity =  ourtotalsupplyordercollection[bidname][j];
+       
+
+              //FIND THE LEAST OF THE VALUE AS WELL
+
+         return (_ooptimalOrderquantity,leastexpectedoptimalorderquantity );
+         
+         
+     }
+      
+            
+ }
